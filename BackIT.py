@@ -6,6 +6,7 @@ import shutil, os, datetime
 import time
 import logging
 import zipfile
+import win32api
 from shutil import copytree
 
 
@@ -21,7 +22,7 @@ backup_downloads = backup_destination + '\\Downloads - '+ backup_date
 
 zipped = base_path + '\\Desktop\\Zipped'
 
-
+key_wrods = ["Desktop", "Documents", "Downloads"]
 
 def usage():
     
@@ -120,12 +121,15 @@ def extract_file(zip_file):
 
 
 
-
 def detect_drives():
     
     """This function detects the drives on the host machine"""
-    pass
+    drives = win32api.GetLogicalDriveStrings()
+    drives = drives.split('\000')[:-1]
 
+    print os.getenv("SystemDrive")
+    print drives
+    
 
 def send_zipfile():
     """This function sends the zipfile by email, 
@@ -133,18 +137,40 @@ def send_zipfile():
     pass
 
 
+def list_all_folers():
 
-def main():
-
-    # TODO: create the menu 
-    #usage()
+    """This function lists all the folders"""
     
-    back_up(desktop_original, backup_desktop)  # Backup Desktop
+    global base_path
 
-    create_zip_file(backup_desktop) # Zipfile
-   
-          
-if __name__ == "__main__":
+    try:
+    
+        user_input = raw_input("Enter the directory name: ")
+        
+        folder_path = base_path + '\\'+ user_input
+        print
+        folders = os.walk(folder_path).next()[1]
 
-    main()
+        for i in folders:
+            print i  + '\n'
+
+    except:
+
+            print "You entered a wrong command......."
+            
+
+
+##def main():
+##
+##    # TODO: create the menu 
+##    #usage()
+##    
+##    back_up(desktop_original, backup_desktop)  # Backup Desktop
+##
+##    create_zip_file(backup_desktop) # Zipfile
+##   
+##          
+##if __name__ == "__main__":
+##
+##    main()
     
