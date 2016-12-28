@@ -2,13 +2,13 @@
     A python program that backs up all important document in the you system
 
 """
-import shutil, os, datetime
+import shutil, os, datetime, sys
 import time
 import logging
 import zipfile
 import win32api
 from shutil import copytree
-
+from twilio.rest import TwilioRestClient
 
 base_path = os.path.expandvars('%userprofile%')
 backup_date = datetime.datetime.now().strftime('%d-%b-%Y')
@@ -16,13 +16,23 @@ backup_destination = 'C:\\BackUp'
 
 desktop_original  =  base_path  + '\\Desktop'
 download_original =  base_path  + '\\Downloads\\Print 2016'
+document_original =  base_path + '\\Documents'
 
 backup_desktop   = backup_destination + '\\Desktop - '  + backup_date
 backup_downloads = backup_destination + '\\Downloads - '+ backup_date
+backup_documents = backup_destination + '\\Documents' +backup_date
+
 
 zipped = base_path + '\\Desktop\\Zipped'
+print zipped
 
-key_wrods = ["Desktop", "Documents", "Downloads"]
+account_SID = "ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+auth_token = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+
+user_number = '+000000000000'
+twilio_number = '+0000000000'
+
+#original_source = ["Desktop", "Documents", "Downloads"] # TO DO MORE OPTIMIZATION
 
 def usage():
     
@@ -40,17 +50,14 @@ def usage():
     print
 
     print " Menu : \n"
-    print "[*] Copy files ------------------------------- 1"
-    print "[*] Compress to a Zipfile -------------------- 2"
-    print "[*] Lisr drives on the host machine ---------- 3"
-    print "[*] Send files by email ---------------------- 4"
-    print "[*] Send files to a Google Drive ------------- 5"
-    print "[*] Send files to USB ------------------------ 6"
-    print "\n\n"
-    
-    options = input("Enter a number to start: ")
-    
-
+    print "[*] List all the options --------------------- 0"
+    print "[*] Back up Desktop -------------------------- 1"
+    print "[*] Back up Downloads ------------------------ 2"
+    print "[*] Back up Documents ------------------------ 3"
+    print "[*] List all dirves -------------------------- 4"
+    print "[*] List all the folders --------------------- 5"
+    print
+    print "* Press q to quit the program"
   
 
 def back_up(source_directory, destination_directory):
@@ -113,6 +120,11 @@ def create_zip_file(folder):
 
     print "Done .......................................... "
 
+    # move the file to Zipped folder
+    if not os.path.exists(zipped):
+        os.mkdir(zipped)
+    # moves compressed files there    
+    shutil.move(zip_folder, zipped)
 
 def extract_file(zip_file):
     
@@ -127,8 +139,11 @@ def detect_drives():
     drives = win32api.GetLogicalDriveStrings()
     drives = drives.split('\000')[:-1]
 
-    print os.getenv("SystemDrive")
-    print drives
+    print
+    
+    print "Primary Drive" , os.getenv("SystemDrive")
+    print
+    print "Drives" , drives
     
 
 def send_zipfile():
@@ -144,7 +159,7 @@ def list_all_folers():
     global base_path
 
     try:
-    
+        print
         user_input = raw_input("Enter the directory name: ")
         
         folder_path = base_path + '\\'+ user_input
@@ -159,18 +174,57 @@ def list_all_folers():
             print "You entered a wrong command......."
             
 
+def send_message_to_user():
 
-##def main():
-##
-##    # TODO: create the menu 
-##    #usage()
-##    
-##    back_up(desktop_original, backup_desktop)  # Backup Desktop
-##
-##    create_zip_file(backup_desktop) # Zipfile
-##   
-##          
-##if __name__ == "__main__":
-##
-##    main()
+    """This function sends a message to the user
+      notifying that the backup is done"""
+    
+    message = "The backup is done .........."
+    twilio_client = TwilioRestClient(account_SID, auth_token)
+    twilio_client.messages.create(body=message, from_=twilio_number, to=user_number)
+
+
+def main():
+
+    # List the menu
+    usage()
+
+    while True:
+        print 
+        options = raw_input("Enter a number to start: ")
+
+        if int(options) == 0:
+            usage()
+            
+        elif int(options) == 1: # desktop
+            back_up(desktop_original, backup_desktop)
+            create_zip_file(backup_desktop)
+            send_message_to_user()
+            
+        elif int(options) == 2: # download
+            back_up(download_original, backup_downloads)
+            create_zip_file(backup_downloads)
+            send_message_to_user()
+            
+        elif int(options) == 3: # documents
+            back_up(document_original,backup_documents)
+            create_zip_file(backup_documents)
+            send_message_to_user()
+            
+        elif int(options) == 4 : # detect all drives on the system
+            detect_drives()
+
+        elif int(options) == 5: # list all folder in the directory
+            list_all_folers()
+            
+        elif options == 'q':
+            sys.exit()
+
+        else:
+            print "Check the Menu"
+   
+          
+if __name__ == "__main__":
+
+    main()
     
