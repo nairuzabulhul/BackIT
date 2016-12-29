@@ -9,20 +9,20 @@
 
 - [x] Creat a menu for the tasks that asks users to choose what to back up
 
-- [x] Compress backup files to zipfile
+- [x] Compress backup files to a zipfile
 
 - [x] List all the drives on the host machine
 
 - [ ] Extract zipfiles
 
-- [ ] Send zipfile by Email, Google Drive or DropBox
+- [ ] Send the zipfiles by Email, Google Drive or DropBox 
 
-- [ ] Print meaningul messages for the user 
+- [ ] Print meaninful error messages for the user 
 
 - [ ] Send the file to trash when the user choose to delete
 
-- [x] Send you a text message when the back is done
+- [x] Send the user a text message when the backup is done
 
-- [ ] Add Date and time for the python script to execute 
+- [ ] Add Date and time for the python script to execute -- Secheduling
 
 - [ ] Clean up and optimize the program
